@@ -12,7 +12,7 @@ Gabe built the 3D Unity app following these tutorials: http://www.anxious-bored.
 
 https://www.lynda.com/Unity-3D-tutorials/Unity-basics/96677/109238-4.html
 
-
+** due to file size limits on git, when running the unity portion of this project locally you must first open the zip file /hack2/iOSBuild7/Libraries/libil2cpp.a.zip. You must also download and place the file located at this link https://www.dropbox.com/s/yh3xvu98ev0e3uz/libiPhone-lib.a?dl=0 in the /hack2/iOSBuild7/Libraries directory
 
 ## What We Learned
 
