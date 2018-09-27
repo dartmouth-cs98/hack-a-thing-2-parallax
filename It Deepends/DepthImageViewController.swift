@@ -61,6 +61,7 @@ class DepthImageViewController: UIViewController {
     bundledJPGs = getAvailableImages()
     
     // Load current image
+    
     loadCurrent(image: bundledJPGs[current], withExtension: "jpg")
   }
   
@@ -102,6 +103,19 @@ extension DepthImageViewController {
   }
   
   func loadCurrent(image name: String, withExtension ext: String) {
+    
+    // 1
+    let depthReader = DepthReader(name: name, ext: ext)
+    
+    // 2
+    let depthDataMap = depthReader.depthDataMap()
+    
+    // 3
+    depthDataMap?.normalize()
+    
+    // 4
+    let ciImage = CIImage(cvPixelBuffer: depthDataMap)
+    depthDataMapImage = UIImage(ciImage: ciImage)
 
     // Create the original unmodified image
     origImage = UIImage(named: "\(name).\(ext)")
@@ -131,6 +145,7 @@ extension DepthImageViewController {
       
     case .depth:
       // Depth
+      imageView.stopAnimating()
       #if IOS_SIMULATOR
         guard let orientation = origImage?.imageOrientation,
           let ciImage = depthDataMapImage?.ciImage,
@@ -142,9 +157,53 @@ extension DepthImageViewController {
       #else
         imageView.image = depthDataMapImage
       #endif
+
+    case .unity:
+      depthSlider.isHidden = true
+      guard let depthImage = depthDataMapImage?.ciImage else {
+        return
+      }
       
+      let maxToDim = max((origImage?.size.width ?? 1.0), (origImage?.size.height ?? 1.0))
+      let maxFromDim = max((depthDataMapImage?.size.width ?? 1.0), (depthDataMapImage?.size.height ?? 1.0))
+      
+      let scale = maxToDim / maxFromDim
+      
+      let focus1: CGFloat = 0.0
+      let focus2: CGFloat = 0.4
+      let focus3: CGFloat = 1.0
+   
+      guard let mask1 = depthFilters?.createMask(for: depthImage, withFocus: CGFloat(focus1), andScale: scale),
+        let filterImage1 = filterImage,
+        let orientation1 = origImage?.imageOrientation else {
+          return
+      }
+      let finalImage1 = depthFilters?.spotlightHighlight(image: filterImage1, mask: mask1, orientation: orientation1)
+      
+    
+      guard let mask2 = depthFilters?.createMask(for: depthImage, withFocus: CGFloat(focus2), andScale: scale),
+        let filterImage2 = filterImage,
+        let orientation2 = origImage?.imageOrientation else {
+          return
+      }
+      let finalImage2 = depthFilters?.spotlightHighlight(image: filterImage2, mask: mask2, orientation: orientation2)
+    
+    
+      guard let mask3 = depthFilters?.createMask(for: depthImage, withFocus: CGFloat(focus3), andScale: scale),
+        let filterImage3 = filterImage,
+        let orientation3 = origImage?.imageOrientation else {
+          return
+      }
+      let finalImage3 = depthFilters?.spotlightHighlight(image: filterImage3, mask: mask3, orientation: orientation3)
+    
+      let finalImages = [finalImage1!, finalImage2!, finalImage3!]
+      imageView.animationImages = finalImages
+      imageView.animationDuration = 5
+      imageView.startAnimating()
+    
     case .mask:
       // Mask
+      imageView.stopAnimating()
       depthSlider.isHidden = false
 
       guard let depthImage = depthDataMapImage?.ciImage else {
@@ -156,7 +215,20 @@ extension DepthImageViewController {
       
       let scale = maxToDim / maxFromDim
       
-      guard let mask = depthFilters?.createMask(for: depthImage, withFocus: CGFloat(depthSlider.value), andScale: scale) else {
+      var sliderValue = CGFloat(depthSlider.value)
+      /*
+      if (sliderValue < 0.33 && sliderValue >= 0.00) {
+        sliderValue = 1/6
+      }
+      if (sliderValue < 0.66 && sliderValue >= 0.33) {
+        sliderValue = 3/6
+      }
+      if (sliderValue <= 1.00 && sliderValue >= 0.66) {
+        sliderValue = 5/6
+      }
+      */
+      
+      guard let mask = depthFilters?.createMask(for: depthImage, withFocus: CGFloat(sliderValue), andScale: scale) else {
         return
       }
       
@@ -173,6 +245,7 @@ extension DepthImageViewController {
       
     case .filtered:
       // Filtered
+      imageView.stopAnimating()
       depthSlider.isHidden = false
       filterControlView.isHidden = false
 
@@ -184,8 +257,21 @@ extension DepthImageViewController {
       let maxFromDim = max((depthDataMapImage?.size.width ?? 1.0), (depthDataMapImage?.size.height ?? 1.0))
       
       let scale = maxToDim / maxFromDim
+      
+      var sliderValue = CGFloat(depthSlider.value)
+      /*
+      if (sliderValue < 0.33 && sliderValue >= 0.00) {
+        sliderValue = 1/6
+      }
+      if (sliderValue < 0.66 && sliderValue >= 0.33) {
+        sliderValue = 5/12
+      }
+      if (sliderValue <= 1.00 && sliderValue >= 0.66) {
+        sliderValue = 0.75
+      }
+      */
 
-      guard let mask = depthFilters?.createMask(for: depthImage, withFocus: CGFloat(depthSlider.value), andScale: scale),
+      guard let mask = depthFilters?.createMask(for: depthImage, withFocus: CGFloat(sliderValue), andScale: scale),
         let filterImage = filterImage,
         let orientation = origImage?.imageOrientation else {
           return
@@ -197,11 +283,11 @@ extension DepthImageViewController {
       
       switch selectedFilter {
       case .spotlight:
-        finalImage = origImage
+        finalImage = depthFilters?.spotlightHighlight(image: filterImage, mask: mask, orientation: orientation)
       case .color:
-        finalImage = origImage
+        finalImage = depthFilters?.colorHighlight(image: filterImage, mask: mask, orientation: orientation)
       case .blur:
-        finalImage = origImage
+        finalImage = depthFilters?.blur(image: filterImage, mask: mask, orientation: orientation)
       }
       
       imageView.image = finalImage

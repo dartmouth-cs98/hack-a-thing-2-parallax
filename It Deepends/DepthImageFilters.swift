@@ -48,8 +48,100 @@ class DepthImageFilters {
   }
   
   func createMask(for depthImage: CIImage, withFocus focus: CGFloat, andScale scale: CGFloat) -> CIImage {
-    return depthImage
+    var s1 = 2000 * MaskParams.slope
+    var s2 = 2000 * -MaskParams.slope
+  
+    var b3 : CGFloat = 0.0
+    var b4: CGFloat = 0.0
+    print(focus)
+    if (focus == 1.0) {
+      b3 = -s1 * (focus - 0.6)
+      b4 = -s2 * (focus + 0.0)
+    }
+    if (focus == 0.4) {
+      b3 = -s1 * (focus - 0.15)
+      b4 = -s2 * (focus + 0.0)
+    }
+    if (focus == 0.0) {
+      b3 = -s1 * (focus - 0.0)
+      b4 = -s2 * (focus + 0.25)
+    }
+    else {
+      s1 = MaskParams.slope
+      s2 = -MaskParams.slope
+      let filterWidth =  2 / MaskParams.slope + MaskParams.width
+      b3 = -s1 * (focus - filterWidth / 2)
+      b4 = -s2 * (focus + filterWidth / 2)
+    }
+    let mask0 = depthImage
+      .applyingFilter("CIColorMatrix", parameters: [
+        "inputRVector": CIVector(x: s1, y: 0, z: 0, w: 0),
+        "inputGVector": CIVector(x: 0, y: s1, z: 0, w: 0),
+        "inputBVector": CIVector(x: 0, y: 0, z: s1, w: 0),
+        "inputBiasVector": CIVector(x: b3, y: b3, z: b3, w: 0)])
+      .applyingFilter("CIColorClamp")
+    
+    let mask1 = depthImage
+      .applyingFilter("CIColorMatrix", parameters: [
+        "inputRVector": CIVector(x: s2, y: 0, z: 0, w: 0),
+        "inputGVector": CIVector(x: 0, y: s2, z: 0, w: 0),
+        "inputBVector": CIVector(x: 0, y: 0, z: s2, w: 0),
+        "inputBiasVector": CIVector(x: b4, y: b4, z: b4, w: 0)])
+      .applyingFilter("CIColorClamp")
+    
+    let combinedMask = mask0.applyingFilter("CIDarkenBlendMode", parameters: ["inputBackgroundImage" : mask1])
+    
+    let mask = combinedMask.applyingFilter("CIBicubicScaleTransform", parameters: ["inputScale": scale])
+    
+    return mask
+  }
+  
+  func spotlightHighlight(image: CIImage, mask: CIImage, orientation: UIImageOrientation = .up) -> UIImage? {
+    
+    // 1
+    let output = image.applyingFilter("CIBlendWithMask", parameters: ["inputMaskImage": mask])
+    
+    // 2
+    guard let cgImage = context.createCGImage(output, from: output.extent) else {
+      return nil
+    }
+    
+    // 3
+    return UIImage(cgImage: cgImage, scale: 1.0, orientation: orientation)
+  }
+  func colorHighlight(image: CIImage, mask: CIImage, orientation: UIImageOrientation = .up) -> UIImage? {
+    
+    let greyscale = image.applyingFilter("CIPhotoEffectMono")
+    let output = image.applyingFilter("CIBlendWithMask", parameters: ["inputBackgroundImage" : greyscale,
+                                                                      "inputMaskImage": mask])
+    
+    guard let cgImage = context.createCGImage(output, from: output.extent) else {
+      return nil
+    }
+    
+    return UIImage(cgImage: cgImage, scale: 1.0, orientation: orientation)
+  }
+  
+  func blur(image: CIImage, mask: CIImage, orientation: UIImageOrientation = .up) -> UIImage? {
+    
+    // 1
+    let invertedMask = mask.applyingFilter("CIColorInvert")
+    
+    // 2
+    let output = image.applyingFilter("CIMaskedVariableBlur", parameters: ["inputMask" : invertedMask,
+                                                                           "inputRadius": 15.0])
+    
+    // 3
+    guard let cgImage = context.createCGImage(output, from: output.extent) else {
+      return nil
+    }
+    
+    // 4
+    return UIImage(cgImage: cgImage, scale: 1.0, orientation: orientation)
   }
 }
+
+
+
 
 

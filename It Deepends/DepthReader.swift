@@ -35,7 +35,48 @@ struct DepthReader {
   
   var name: String
   var ext: String
+  
+  func depthDataMap() -> CVPixelBuffer? {
+    
+    // 1
+    guard let fileURL = Bundle.main.url(forResource: name, withExtension: ext) as CFURL? else {
+      return nil
+    }
+    
+    // 2
+    guard let source = CGImageSourceCreateWithURL(fileURL, nil) else {
+      return nil
+    }
+    
+    // 3
+    guard let auxDataInfo = CGImageSourceCopyAuxiliaryDataInfoAtIndex(source, 0, kCGImageAuxiliaryDataTypeDisparity) as? [AnyHashable : Any]
+    else {
+          return nil
+    }
+    
+    // 4
+    var depthData: AVDepthData
+    
+    do {
+      // 5
+      depthData = try AVDepthData(fromDictionaryRepresentation: auxDataInfo)
+      
+    } catch {
+      return nil
+    }
+    
+    // 6
+    if depthData.depthDataType != kCVPixelFormatType_DisparityFloat32 {
+      depthData = depthData.converting(toDepthDataType: kCVPixelFormatType_DisparityFloat32)
+    }
+    
+    // 7
+    return depthData.depthDataMap
+  }
+
 
 }
 #endif
+
+
 

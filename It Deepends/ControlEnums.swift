@@ -33,6 +33,7 @@ enum ImageMode: Int {
   case depth = 1
   case mask = 2
   case filtered = 3
+  case unity = 4
 }
 
 enum FilterType: Int {
