@@ -9,6 +9,7 @@ While that was our initial idea, due to our limited (read: no) prior usage of Sw
 Tom built the Swift depth app following this tutorial: https://www.raywenderlich.com/314-image-depth-maps-tutorial-for-ios-getting-started
 
 Gabe built the 3D Unity app following these tutorials: http://www.anxious-bored.com/blog/2018/2/25/theparallaxview-illusion-of-depth-by-3d-head-tracking-on-iphone-x
+
 https://www.lynda.com/Unity-3D-tutorials/Unity-basics/96677/109238-4.html
 
 
