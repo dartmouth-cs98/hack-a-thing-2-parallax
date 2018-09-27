@@ -8,7 +8,10 @@ While that was our initial idea, due to our limited (read: no) prior usage of Sw
 
 Tom built the Swift depth app following this tutorial: https://www.raywenderlich.com/314-image-depth-maps-tutorial-for-ios-getting-started
 
-Gabe built the 3D Unity app following this tutorial: http://www.anxious-bored.com/blog/2018/2/25/theparallaxview-illusion-of-depth-by-3d-head-tracking-on-iphone-x
+Gabe built the 3D Unity app following these tutorials: http://www.anxious-bored.com/blog/2018/2/25/theparallaxview-illusion-of-depth-by-3d-head-tracking-on-iphone-x
+https://www.lynda.com/Unity-3D-tutorials/Unity-basics/96677/109238-4.html
+
+
 
 ## What We Learned
 
@@ -16,10 +19,11 @@ Gabe built the 3D Unity app following this tutorial: http://www.anxious-bored.co
 I learned the semantics of Swift, as well as how to develop and debug using Xcode, including building a UI with the visual manifests. On top of that, I also learned a lot about the way images are stored in IOS and how to perform pixel-wise operations on them. 
 
 ##### Gabe
+I learned how to use Unity and UnityARKit to a build and run an application on iOS that tracks the eye positioning of the user to create a perspective effect when viewing images and other 3D models like boxes and spheres. I also learned the basics of creating Scenes in Unity using camera position and lighting tools. I utilize simple shaders on the surfaces of 3D objects to create a sheen effect based on lighting position.
 
 ## How It Relates To Project Ideas
 With over 90 million people in the US alone owning IOS devices, we felt that learning the principles of IOS development would be a powerful tool for any consumer (or even enterprise) facing project. In the same vein, with ARkit being one of the most cutting edge tools for IOS development, we felt that working on a Unity app would be a good way to get familiar with this new technology.
 
 ## What Didn't Work
 
-On the Swift side of things, we had extreme difficulty making a Unity scene within the app, such that the entire app wasn't a unity project. 
+On the Swift side of things, we had extreme difficulty making a Unity scene within the app, such that the entire app wasn't a unity project. On the Unity side we had difficulties creating new objects in the Eye Tracker Scene because of camera and light issues which led us to reference the second Unity tutorial. We also experienced issues trying to get the eye tracking to work in portrait mode, so currently on landscape is compatible.
