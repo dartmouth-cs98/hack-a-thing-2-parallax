@@ -172,7 +172,8 @@ extension DepthImageViewController {
       let focus1: CGFloat = 0.0
       let focus2: CGFloat = 0.4
       let focus3: CGFloat = 1.0
-   
+      
+      
       guard let mask1 = depthFilters?.createMask(for: depthImage, withFocus: CGFloat(focus1), andScale: scale),
         let filterImage1 = filterImage,
         let orientation1 = origImage?.imageOrientation else {
@@ -180,7 +181,7 @@ extension DepthImageViewController {
       }
       let finalImage1 = depthFilters?.spotlightHighlight(image: filterImage1, mask: mask1, orientation: orientation1)
       
-    
+ 
       guard let mask2 = depthFilters?.createMask(for: depthImage, withFocus: CGFloat(focus2), andScale: scale),
         let filterImage2 = filterImage,
         let orientation2 = origImage?.imageOrientation else {
@@ -195,7 +196,8 @@ extension DepthImageViewController {
           return
       }
       let finalImage3 = depthFilters?.spotlightHighlight(image: filterImage3, mask: mask3, orientation: orientation3)
-    
+ 
+
       let finalImages = [finalImage1!, finalImage2!, finalImage3!]
       imageView.animationImages = finalImages
       imageView.animationDuration = 5

@@ -58,11 +58,12 @@ class DepthImageFilters {
       b3 = -s1 * (focus - 0.6)
       b4 = -s2 * (focus + 0.0)
     }
-    if (focus == 0.4) {
+    else if (focus == 0.4) {
+      print("Got here")
       b3 = -s1 * (focus - 0.15)
       b4 = -s2 * (focus + 0.0)
     }
-    if (focus == 0.0) {
+    else if (focus == 0.0) {
       b3 = -s1 * (focus - 0.0)
       b4 = -s2 * (focus + 0.25)
     }
